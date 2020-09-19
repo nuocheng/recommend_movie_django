@@ -1,0 +1,338 @@
+{% load static %}
+<html class="x-admin-sm">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>欢迎页面-X-admin2.2</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="{% static 'administrator/css/font.css' %}">
+        <link rel="stylesheet" href="{% static 'administrator/css/xadmin.css' %}">
+        <link rel="stylesheet" href="{% static 'administrator/css/layui.css' %}">
+        <script type="text/javascript" src="{% static 'administrator/lib/layui/layui.js' %}" charset="utf-8"></script>
+        <script type="text/javascript" src="{% static 'administrator/js/xadmin.js' %}"></script>
+        <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+       <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://cdn.bootcss.com/moment.js/2.24.0/moment-with-locales.js"></script>
+       <script src="https://cdn.bootcss.com/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+            <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+            <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]--></head>
+
+    <body>
+    {% if flag == 2 %}
+          <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" action="{% url 'administrator:change_actor' %}" method="post" enctype="multipart/form-data">
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>导演姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="hidden" name="actor_id" value="{{ info.auteur_id }}">
+                            <input value="{{ info.name }}" type="text" id="username" name="name" required="" lay-verify="required" autocomplete="off" class="layui-input"></div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label for="phone" class="layui-form-label">
+                            <span class="x-red">*</span>出生年月</label>
+
+                           <div class="form-group">
+
+                                <div class='input-group date' id='datetimepicker1'>
+
+                                    <input type='text' class="form-control"  name="birth"  value="{{ info.birth|date:'y-m-d' }}"/>
+
+                                    <span class="input-group-addon">
+
+                                        <span class="glyphicon glyphicon-calendar"></span>
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+
+                                      <script type="text/javascript">
+                                            $(function () {
+                                                $('#datetimepicker1').datetimepicker({
+                                                    format: 'YYYY-MM-DD',
+                                                    locale: moment.locale('zh-cn')
+                                                });
+
+                                            });
+
+                                        </script>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>性别</label>
+                        <div class="layui-input-inline">
+                            <select id="select" name="gender" class="valid">
+                                <option value="0" {% if info.gender == 0 %} selected="selected"{% endif %}>男</option>
+                                <option value="1" {% if info.gender == 1 %} selected="selected" {% endif %}>女</option></select>
+                        </div>
+                    </div>
+                     <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>出生地</label>
+                        <div class="layui-input-inline">
+                            <input value="{{ info.place }}" type="text" id="username" name="place" required="" lay-verify="required" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label for="desc" class="layui-form-label">上传本人图片</label>
+                        <div class="layui-upload-drag" id="test11">
+                          <i class="layui-icon"></i>
+                          <p>点击上传，或将文件拖拽到此处修改</p>
+                          <div class="layui" id="uploadDemoView">
+                            <hr>
+                            <img src="/static/upload/{{ info.image }}" alt="上传成功后渲染"  id="preview" style="max-width: 196px">
+                          </div>
+                        </div>
+
+
+            </div>
+            <div class="layui-form-item">
+                <label for="L_repass" class="layui-form-label"></label>
+               <button class="layui-btn" lay-filter="add" lay-submit="" id="commits">确认修改</button></div>
+            </form>
+            </div>
+        </div>
+                <script>
+                        layui.use(['form', 'layer', 'upload'], function () {
+                            var layer = layui.layer;
+                            var upload = layui.upload;
+                            var $ = layui.jquery;
+                            var img_url = ''
+                            upload.render({
+                                elem: '#test11', //上传图标
+                                url: '{% url 'administrator:change_auteur'%}',
+                                auto: false,//选择文件后不自动上传
+                                bindAction: '#commits',
+                                size: 20000,
+                                //上传前的回调
+                                before: function (obj) {
+                                    this.data = {
+                                        actor_id:$('input[name="actor_id"]').val(),
+                                        name:$('input[name="name"]').val(),
+                                        birth:$('input[name="birth"]').val(),
+                                        gender:$('#select option:selected').val(),
+                                        place:$('input[name="place"]').val()
+                                    }
+                                    console.log(this.data)
+                                },
+                                //选择文件后的回调
+                                choose: function (obj) {
+                                    obj.preview(function (index, file, result) {
+                                        console.log(file.name)
+                                        $('#preview').attr('src', result);
+                                        $('#preview').attr('title', file.name);
+                                    })
+                                },
+                                //操作成功的回调
+                                done: function (res, index, upload) {
+
+                                    layer.alert("操作成功", {icon: 6}, function () {
+                                        parent.window.location.reload();
+                                    })
+                                    console.log(res)
+
+                                },
+                                //上传错误回调
+                                error: function (res, index, upload) {
+                                    //layer.alert('上传失败！' + res);
+                                }
+                            });
+                        })
+                </script>
+    {% elif flag == 1 %}
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>导演姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="username" name="name" required="" lay-verify="required" autocomplete="off" class="layui-input"></div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label for="phone" class="layui-form-label">
+                            <span class="x-red">*</span>出生年月</label>
+
+                           <div class="form-group">
+
+                                <div class='input-group date' id='datetimepicker1'>
+
+                                    <input name="birth" type='text' class="form-control" />
+
+                                    <span class="input-group-addon">
+
+                                        <span class="glyphicon glyphicon-calendar"></span>
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+
+                                      <script type="text/javascript">
+                                            $(function () {
+                                                $('#datetimepicker1').datetimepicker({
+                                                    format: 'YYYY-MM-DD',
+                                                    locale: moment.locale('zh-cn')
+                                                });
+
+                                            });
+
+                                        </script>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>性别</label>
+                        <div class="layui-input-inline">
+                            <select id="select" name="shipping" class="valid">
+                                <option value="0">男</option>
+                                <option value="1">女</option></select>
+                        </div>
+                    </div>
+                     <div class="layui-form-item">
+                        <label for="username" class="layui-form-label">
+                            <span class="x-red">*</span>出生地</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="username" name="place" required="" lay-verify="required" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label for="desc" class="layui-form-label">上传本人图片</label>
+                        <div class="layui-upload-drag" id="test10">
+                          <i class="layui-icon"></i>
+                          <p>点击上传，或将文件拖拽到此处</p>
+                          <div class="layui" id="uploadDemoView">
+                            <hr>
+                            <img src="" alt="上传成功后渲染" id="preview" style="max-width: 196px">
+                          </div>
+                        </div>
+
+
+            </div>
+            <div class="layui-form-item">
+                <label for="L_repass" class="layui-form-label"></label>
+               <button class="layui-btn" lay-filter="add" lay-submit="" id="commit">增加信息</button></div>
+            </form>
+            </div>
+        </div>
+                <script>
+                        layui.use(['form', 'layer', 'upload'], function () {
+                            var layer = layui.layer;
+                            var upload = layui.upload;
+                            var $ = layui.jquery;
+                            var img_url = ''
+                            upload.render({
+                                elem: '#test10', //上传图标
+                                url: '{% url 'administrator:add_auteur'%}',
+                                auto: false,//选择文件后不自动上传
+                                bindAction: '#commit',
+                                size: 20000,
+                                //上传前的回调
+                                before: function (obj) {
+                                    this.data = {
+                                        name:$('input[name="name"]').val(),
+                                        birth:$('input[name="birth"]').val(),
+                                        gender:$('#select option:selected').val(),
+                                        place:$('input[name="place"]').val()
+                                    }
+                                    console.log(this.data)
+                                },
+                                //选择文件后的回调
+                                choose: function (obj) {
+                                    obj.preview(function (index, file, result) {
+                                        console.log(file.name)
+                                        $('#preview').attr('src', result);
+                                        $('#preview').attr('title', file.name);
+                                    })
+                                },
+                                //操作成功的回调
+                                done: function (res, index, upload) {
+
+                                    layer.alert("操作成功", {icon: 6}, function () {
+                                        parent.window.location.reload();
+                                    })
+                                    console.log(res)
+
+                                },
+                                //上传错误回调
+                                error: function (res, index, upload) {
+                                    //layer.alert('上传失败！' + res);
+                                }
+                            });
+                        })
+                </script>
+
+    {% endif %}
+
+
+
+
+
+    <script>layui.use(['form', 'layer'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+
+                //自定义验证规则
+                form.verify({
+                    nikename: function(value) {
+                        if (value.length < 5) {
+                            return '昵称至少得5个字符啊';
+                        }
+                    },
+                    pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                    repass: function(value) {
+                        if ($('#L_pass').val() != $('#L_repass').val()) {
+                            return '两次密码不一致';
+                        }
+                    }
+                });
+
+                //监听提交
+                form.on('submit(add)',
+                function(data) {
+                    console.log(data);
+                    //发异步，把数据提交给php
+                    layer.alert("成功", {
+                        icon: 6
+                    },
+                    function() {
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+                    return false;
+                });
+
+            });</script>
+        <script>var _hmt = _hmt || []; (function() {
+                var hm = document.createElement("script");
+                hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+                var s = document.getElementsByTagName("script")[0];
+                s.parentNode.insertBefore(hm, s);
+            })();</script>
+    </body>
+
+
+
+
+
+</html>

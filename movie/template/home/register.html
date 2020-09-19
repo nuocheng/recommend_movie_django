@@ -1,0 +1,87 @@
+{% load static %}
+<html>
+<head>
+		<meta charset="utf-8">
+		<title>注册界面</title>
+		<link rel="stylesheet" href="{% static 'userlogin/css/reset.css' %}" />
+		<link rel="stylesheet" href="{% static 'userlogin/css/common.css' %}" />
+		<link rel="stylesheet" href="{% static 'userlogin/css/font-awesome.min.css' %}" />
+		<script src="{% static 'userlogin/js/jquery.min.js' %}"></script>
+	</head>
+	<body>
+		<div class="wrap login_wrap">
+			<div class="content">
+				
+				<div class="logo"></div>
+				
+				<div class="login_box">	
+					
+					<div class="login_form">
+						<div class="login_title">
+							注册
+						</div>
+						<form id="register">
+							{% csrf_token %}
+							<div class="form_text_ipt">
+								<input name="username" type="text" placeholder="手机号/邮箱/用户名" id="username">
+							</div>
+							<div class="ececk_warning" id="check_user"><span>手机号/邮箱/用户名不能为空</span></div>
+							<div class="form_text_ipt">
+								<input name="password" type="password" placeholder="密码" id="password">
+							</div>
+							<div class="ececk_warning" id="check_password"><span>密码不能为空</span></div>
+							<div class="form_text_ipt">
+								<input name="repassword" type="password" placeholder="重复密码" id="password_again">
+							</div>
+							<div class="ececk_warning" id="check_password_again"><span>密码不能为空</span></div>
+							<div class="form_btn">
+								<button  type="button">注册</button>
+							</div>
+							<div class="form_reg_btn">
+								<span>已有帐号？</span><a href="{%url 'home:login' %}">马上登录</a>
+							</div>
+						</form>
+						<script>
+							$(document).on("click","button",function(){
+							    var username=$("#username").val();
+								var password=$("#password").val();
+								var password_again=$("#password_again").val();
+								console.log({
+                                    "username":username,
+                                    "password":password,
+                                    "password2":password_again
+                                })
+								if(username==""){
+									$("#check_user").css("display","block");
+								}
+								if(password==""){
+							        $("#check_password").css("display","block");
+								}
+								if(password_again==""){
+							        $("#check_password_again").css("display","block");
+								}
+								if(password!=password_again){
+							        $("#check_password_again").html("<span>两次密码不相同</span>");
+							        $("#check_password_again").css("display","block");
+								}
+
+								else if(username!="" && password!="" && password_again!="" && password==password_again){
+							        $("form").attr({
+										"action":"{% url 'home:register' %}",
+										"method":"post"
+									}).submit()
+								}
+							})
+						</script>
+						<div class="other_login">
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="{% static 'userlogin/js/common.js' %}" ></script>
+		<div style="text-align:center;">
+</div>
+	</body>
+</html>

@@ -1,0 +1,392 @@
+{% load static %}
+<html>
+   <head>
+      <title>电影推荐系统</title>
+      <meta charset="utf-8">
+      <link href="{% static 'home/css/fonts/fonts.css' %}" rel="stylesheet" />
+      <link href="{% static 'home/css/bootstrap.min.css' %}" rel="stylesheet" />
+      <link href="{% static 'home/img/favicon.svg' %}" type="image/x-icon" rel="shortcut icon" />
+      <link href="{% static 'home/css/screen.css' %}" rel="stylesheet" />
+      <link rel="stylesheet" href="{% static 'home/layui/css/layui.css' %}" media="all">
+      <script src="{% static 'home/js/jquery.min.js' %}"></script>
+      <script src="{% static 'home/js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'home/js/vue/vue.js' %}"></script>
+      <script src="{% static 'home/layui/layui.js' %}"></script>
+
+      <style type="text/css">
+         body{
+            background-color: #f8f8f8;
+         }
+           #content{
+               width:100%;
+               position:relative;
+           }
+         #nav_second{
+            width:15%;
+            float:left;
+            margin-right:10px;
+         }
+         .show_info{
+            margin-left:2%;
+            width:80%;
+            float:left;
+         }
+         .item{
+             display: block;
+             float: left;
+             color: #37a;
+             font-size: 13px;
+             text-align: center;
+             margin: 0 25px 10px 0;
+             width: 115px;
+             margin-left:2%;
+         }
+         #content > a {
+             cursor: pointer;
+         }
+         .cover_inf0{
+                background-size: 100%;
+                height: 220px;
+                overflow: hidden;
+         }
+         .cover_inf0 img{
+            width:300px;
+
+         }
+          footer .info-text{
+
+              clear: both;
+               width:100%;
+               line-height: 1.8;
+                color: #a8aaba;
+                font-family: "微软雅黑";
+                margin: 0 auto;
+                padding: 20px 0;
+                font-size: 12px;
+                text-align: center;
+                background:#32333B;
+           }
+      </style>
+   </head>
+   <body class="home" id="page" data-spy="scroll" data-target="#myScrollspy">
+      <!-- Header -->
+      <header class="main-header">
+         <div class="container" >
+            <div class="header-content">
+               <a href="#">
+
+               </a>
+
+               <nav class="site-nav">
+                  <ul class="clean-list site-links">
+                     <li>
+                        <a href="#">最近更新</a>
+                     </li>
+                     <li>
+                        <a href="#">好评电影</a>
+                     </li>
+                      <li>
+                        <a href="#">精彩电影</a>
+                     </li>
+                  </ul>
+                    {% if username is null %}
+                        <a href="{% url 'home:login' %}" class="btn btn-outlined">Sign up</a>
+                   {% else %}
+                        <button style="background:#000;color:#fff;" class="btn btn-outlined">欢迎{{ username }}</button>
+                   {% endif %}
+               </nav>
+            </div>
+         </div>
+      </header>
+
+
+      <div class="content-box" style="margin-bottom:8px;">
+         <!-- Hero Section -->
+         <section class="section section-hero">
+            <div class="hero-box">
+               <div class="container">
+                  <div class="hero-text align-center">
+                     <h1 >电影推荐系统</h1>
+                     <p>Movie recommendation system</p>
+                  </div>
+
+                  <form class="destinations-form">
+                     <div class="input-line">
+                         <form>
+                            <input type="text" name="keyword"  id="keyword" value="" style="text-align:center;" class="form-input check-value" placeholder="找 你 所 爱，看 你 想 看" />
+                            <button type="button" id="search_btn" name="destination-submit" class="form-submit btn btn-special glyphicon glyphicon-heart">Find a movie</button>
+                        </form>
+                     </div>
+                  </form>
+                   <script>
+                       $(document).on("click","#search_btn",function(){
+                            var keyword=$("#keyword").val()
+                            if(keyword.length!=0){
+                                $("form").attr({
+                                    "action":"{% url 'home:movie_desc'%}",
+                                    "method":'get'
+                                }).submit();
+                            }else{
+                                 $("form").attr({
+                                    "action":"{% url 'home:search'%}",
+                                    "method":'get'
+                                }).submit();
+                            }
+
+                       })
+                   </script>
+               </div>
+            </div>
+
+            <!-- Statistics Box -->
+            <div class="container">
+               <div class="statistics-box">
+                  <div class="statistics-item">
+                     <span class="value">{{ movie_count }}</span>
+                     <p class="title">收集电影数量</p>
+                  </div>
+
+                  <div class="statistics-item">
+                     <span class="value">{{ actor_count }}</span>
+                     <p class="title">收集演员数量</p>
+                  </div>
+
+                  <div class="statistics-item">
+                     <span class="value">{{ auteur_count }}</span>
+                     <p class="title">收集导演数据</p>
+                  </div>
+
+                  <div class="statistics-item">
+                     <span class="value">{{ movie_count }}</span>
+                     <p class="title">最热电影</p>
+                  </div>
+               </div>
+            </div>
+         </section>
+      </div>
+      <!--内容部分-->
+      <div id="content">
+         <!--分类导航-->
+         <div id="nav_second">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test" >
+            <!-- 侧边导航: <ul class="layui-nav layui-nav-tree layui-nav-side"> -->
+             {% if flag == 1 %} <li class="layui-nav-item layui-nav-itemed" v-if="persion" ><a @click="tabchage" data-id="1" href="javascript:;">为您推荐</a></li>{% endif %}
+              <li class="layui-nav-item" ><a @click="tabchage" data-id="2" href="javascript:;">最近更新</a></li>
+              <li class="layui-nav-item" ><a @click="tabchage" data-id="3" href="javascript:;">好评电影</a></li>
+              <li class="layui-nav-item" ><a @click="tabchage" data-id="4" href="javascript:;">精彩电影</a></li>
+{#              <li class="layui-nav-item" ><a @click="tabchage" data-id="4" href="javascript:;">国外电影</a></li>#}
+{#              <li class="layui-nav-item" ><a @click="tabchage" data-id="4" href="javascript:;">国外电影</a></li>#}
+            </ul>
+         </div>
+         <!--内容展示-->
+         <!--电影推荐-->
+         <div class="show_info">
+            <!--电影推荐部分-->
+
+               <div class="layui-carousel" id="test1" v-show="tag==1">
+                 <div carousel-item>
+                    <!--个人推荐部分-->
+                        <div>
+                            {% for info in page1 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                            {% empty %}
+                                {% if flag == 2 %}
+                                <span style="display:block;margin:50px auto;">您是新用户，请先在系统内通过搜索，并对电影评分，才能为您推荐相应电影</span>
+                               {% else %}
+                                   <span style="display:block;margin:50px auto;">欢迎使用个性化推荐系统，请先登录，查看为您推荐的精彩电影</span>
+                                {% endif %}
+                     {% endfor %}
+                        </div>
+
+
+
+
+
+
+                          <script>
+                            layui.use('carousel', function() {
+                                 var carousel = layui.carousel;
+                                    //建造实例
+                                    carousel.render({
+                                        elem: '#test1',
+                                        width: '100%', //设置容器宽度
+                                        indicator: 'outside',
+                                        autoplay:true,
+                                        arrow: 'none',
+                                        height: '450px',
+                                        interval: 7000
+                                    });
+                            })
+                         </script>
+                 </div>
+               </div>
+
+
+
+               <div class="layui-carousel" id="test2" v-show="tag==2">
+                 <div carousel-item>
+                    <!--最近热映-->
+
+                          <div>
+                            {% for info in page2 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                             {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                        </div>
+                         <div>
+                            {% for info in page2_2 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                             {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                        </div>
+                            <div>
+                                {% for info in page2_3 %}
+                                <a class="item">
+                                  <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                                </a>
+                                 {% empty %}
+                                    <div>没有相关数据</div>
+                                 {% endfor %}
+                            </div>
+
+
+                        <script>
+                          layui.use('carousel', function() {
+                                var carousel = layui.carousel;
+                                //建造实例
+                                carousel.render({
+                                    elem: '#test2',
+                                    width: '100%', //设置容器宽度
+                                    indicator: 'outside',
+                                    autoplay: false,
+                                    arrow: 'none',
+                                    height: '450px',
+                                    interval: 7000
+                                });
+                            })
+                         </script>
+                 </div>
+               </div>
+
+
+
+            <div class="layui-carousel" id="test3" v-show="tag==3">
+                 <div carousel-item>
+                    <!--大陆电影-->
+                          <div>
+                             {% for info in page3 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                            {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                          </div>
+                        <div>
+                             {% for info in page3_2 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                            {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                          </div>
+                          <!--还需要的话，直接添加div就行-->
+                        <script>
+                          layui.use('carousel', function() {
+                                var carousel = layui.carousel;
+                                //建造实例
+                                carousel.render({
+                                    elem: '#test3',
+                                    width: '100%', //设置容器宽度
+                                    indicator: 'outside',
+                                    autoplay: false,
+                                    arrow: 'none',
+                                    height: '450px',
+                                    interval: 7000
+                                });
+                            })
+                         </script>
+                 </div>
+            </div>
+
+
+
+            <div class="layui-carousel" id="test4" v-show="tag==4">
+                 <div carousel-item>
+                    <!--国外电影-->
+                         <div>
+                             {% for info in page4 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                            {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                          </div>
+                          <div>
+                             {% for info in page4_2 %}
+                            <a class="item">
+                              <div class="cover_inf0"><img src="{{ info.movie_image }}" alt="{{ info.name }}" /><p>{{ info.name }}</p></div>
+                            </a>
+                            {% empty %}
+                                <div>没有相关数据</div>
+                             {% endfor %}
+                          </div>
+                          <!--还需要的话，直接添加div就行-->
+                        <script>
+                          layui.use('carousel', function() {
+                                var carousel = layui.carousel;
+                                //建造实例
+                                carousel.render({
+                                    elem: '#test4',
+                                    width: '100%', //设置容器宽度
+                                    indicator: 'outside',
+                                    autoplay: false,
+                                    arrow: 'none',
+                                    height: '450px',
+                                    interval: 7000
+                                });
+                            })
+                         </script>
+                 </div>
+            </div>
+
+
+
+
+         </div>
+      </div>
+      <footer>
+          <div class="info-text w1100"><p class="copyright">张程东毕业设计(https://nuocheng.github.io) 博客 <em></em><a href="#"></a></p><p class="company-info">计算机科学与技术</p><p class="qualified"></p></div>
+      </footer>
+
+      <script src="{% static 'home/js/jquery.js' %}"></script>
+      <script src="{% static 'home/js/functions.js' %}"></script>
+
+   </body>
+      <script>
+           var app=new Vue({
+             el:"#content",
+             data:{
+                 //登录后实现推荐展示true否则为false
+                 persion:true,
+                 tag:1
+             },
+             methods:{
+                  tabchage:function(e){
+                      this.tag=e.target.dataset.id;
+                  }
+             }
+         });
+      </script>
+
+</html>

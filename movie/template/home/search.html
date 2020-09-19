@@ -1,0 +1,277 @@
+{% extends 'template.html' %}
+{% load static %}
+{% block script %}
+     <link href="{% static 'home/css/bootstrap.min.css' %}" rel="stylesheet" />
+     <link href="{% static 'home/css/reset.css' %}" rel="stylesheet" />
+     <link href="{% static 'home/css/style.css' %}" rel="stylesheet" />
+     <link href="{% static 'home/css/bootstrap.min.css' %}" rel="stylesheet" />
+     <script src="{% static 'home/js/jquery.js' %}"></script>
+     <script src="{% static 'home/js/bootstrap.min.js' %}"></script>
+     <style>
+         .item{
+             padding:2px 3px;
+             width:1000px;
+             height:225px;
+             transition:0.5s all;
+             margin:8px auto;
+             margin-bottom:24px;
+             border-bottom:1px solid #cccccc3b;
+             overflow: hidden;
+             border-top-left-radius:30px;
+              border-top-right-radius:30px;
+              border-bottom-right-radius:4px;
+              border-bottom-left-radius:4px;
+              box-shadow: 30px 11px 18px -17px #ccc;
+         }
+         .item:hover{
+
+              -webkit-box-shadow: 17px 33px 18px -17px #ccc,0 0 5px rgba(0,0,0,0.1) inset;
+             -moz-box-shadow:  17px 33px 18px -17px #ccc,0 0 5px rgba(0,0,0,0.1) inset;
+              box-shadow: 17px 33px 18px -17px #ccc,0 0 5px rgba(0,0,0,0.1) inset;
+         }
+         .pic{
+             margin-left:8%;
+             width:12%;
+
+
+             float:left;
+         }
+         .movie_info{
+             margin-left:1%;
+             width:70%;
+             height: 100%;
+             float:left;
+         }
+         .movie_info ul{
+             clear:both;
+             display:block;
+
+         }
+         .movie_info ul li{
+            float:left;
+         }
+     </style>
+    <script>
+
+    </script>
+{% endblock %}
+{% block content %}
+  <div style="position:relative;top:8px;margin-bottom:10px;">
+        <div class="searchbox">
+            <form  method="get" id="search">
+                {% csrf_token %}
+                <input type="text" name="keyword" class="keyword" id="keyword" placeholder="请输入你要查询的电影名称" value="{{ keyword }}">
+                <button class="btn-search">搜索</button>
+            </form>
+            <div id="searchDiv" style="background:#f8f8f8;z-index:2;display:none;border:1px solid;border-color:#bdb9b9;width:501px;position:absolute;">
+			</div>
+        </div>
+      <!--搜索结果集-->
+        <div id="result">
+            {% for info in data.object_list %}
+                <div class="item">
+                    <!--电影缩略图-->
+                    <div class="pic" data-target="#exampleModal" data-toggle="modal" data-whatever="{{ info.name }}"  data-id="{{ info.movie }}">
+                        <a href="#">
+                            <img src="{{ info.movie_image }}" />
+                            <p style="font-size:13px;font-family: ‘楷体’;font-weight:bold;text-align:center;padding-top: 1px;color:#a1a1a1">{{ info.name }}</p>
+                        </a>
+                    </div>
+                    <div class="movie_info">
+                        <!--导演列表-->
+                        <ul>
+                            <li style="font-weight:bold;">导演：</li>
+                            {% for auteur in info.auteur %}
+                                <li><a href="#">{{ auteur.name }}&nbsp;</a></li>
+                            {% empty %}
+                                <li><a href="#">查询失败</a></li>
+                            {% endfor %}
+                        </ul>
+                        <!--演员列表-->
+                         <ul>
+                            <li style="font-weight:bold;">演员：</li>
+                             {% for actor in info.actor %}
+                                <li><a href="#">{{ actor.name }}&nbsp;</a></li>
+                             {% empty %}
+                                <li><a href="#">查询失败&nbsp;</a></li>
+                             {% endfor %}
+                        </ul>
+                        <!--制片国家/地区-->
+                        <ul>
+                            <li style="font-weight:bold;">制片国家/地区：</li>
+                            <li>{{ info.movie_country }}</li>
+
+                        </ul>
+                        <!--上映时间-->
+                        <ul>
+                            <li style="font-weight:bold;">上映时间：</li>
+                            <li>{{ info.movie_run }}</li>
+
+                        </ul>
+                        <!--电影简介-->
+                         <ul>
+                            <li style="font-weight:bold;">电影简介：</li>
+                            <li>{{ info.movie_desc|truncatechars:233}}</li>
+
+                        </ul>
+                    </div>
+                </div>
+             {% empty %}
+                <div style="color:#666a8a;font-size:18px;font-weight:bold;font-family:'楷体';width:100%;height:300px;line-height:300px;text-align:center;">抱歉！没有您要查询的电影</div>
+            {% endfor %}
+            <!--分页-->
+            <div style="margin-top:5px;text-align:center;" >
+                <ul class="pagination">
+                {% for pindex in data.paginator.page_range %}
+                    {% if pindex == page.number %}
+                        {{ pindex }}
+                    {% else %}
+                        <li>
+                            <a href="{% url 'home:movie_desc' %}?pindex={{ pindex }}&keyword={{ keyword}}">{{ pindex }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+
+  </div>
+<script>
+    $(document).ready(function(){
+        $("#keyword").keyup(function(){
+             var keyword=$(this).val();
+             $.ajax({
+                 type:'get',
+                 url:"{% url 'home:movie_info' %}",
+                 async:true,
+                 data:{
+                     "keyword":keyword
+                    },
+                 dataType:"json",
+                 success:function(e){
+                     var data=eval(e);
+                     var content="";
+                     if(data.length>0){
+                         var lengths=0;
+                         if(data.length<5){
+                             lengths=data.length;
+                         }
+                         else{
+                             lengths=5;
+                         }
+                         $("#searchDiv").css("display","block");
+                         for(var i=0;i<lengths;i++){
+                             content+="<div style='padding:5px;cursor:pointer;background:#f8f8f8;' onclick='clickFn(this)' onmouseover='mouse_over(this)' onmouseout='mouse_out(this)'>"+data[i].name+"</div>";
+                         }
+                         $("#searchDiv").html(content);
+                     }
+
+                 },
+                 error:function(e){
+                     console.log("获取失败")
+                 }
+             })
+        })
+
+    })
+    function clickFn(obj){
+		$("#keyword").val($(obj).html());
+		$("#searchDiv").css("display","none");
+	}
+	function mouse_out(obj){
+		$(obj).css("background","#f8f8f8");
+	}
+	function mouse_over(obj){
+		$(obj).css("background","#337ab7a6");
+	}
+</script>
+<script>
+    $(document).on("click",".btn-search",function(){
+        var keyword=$("#keyword").val();
+        $("#search").attr({
+            "action":"{% url 'home:movie_desc' %}",
+            'method':"get"
+        }).submit();
+    })
+</script>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+            </div>
+            <div class="modal-body">
+                <form id="score">
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">请输入你的评分:</label>
+                        {% csrf_token %}
+                        <input type="hidden" id="userid" name="user_id" value="{{ userid }}">
+                        <input type="hidden" id="movie_id" name="movie_id" value="">
+                        <input type="text" class="form-control" name="movie_score" id="recipient-name">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="user_score">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+     //绑定模态框展示的方法
+    $('#exampleModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // 触发事件的按钮
+        var recipient = button.data('whatever') // 解析出whatever内容
+        var movie_id=button.data("id");
+        var modal = $(this)  //获得模态框本身
+        modal.find('.modal-title').text('欢迎对《' + recipient+"》进行评分")  // 更改将title的text
+        modal.find('.modal-body #movie_id').val(movie_id)
+
+    })
+     //提交评分内容
+    $(document).on('click','#user_score',function(){
+        var userid=$("#userid").val();
+        var score=$("#recipient-name").val();
+        var movie_id=$("#movie_id").val();
+        if(userid=="None"){
+            alert("亲！请先登录，再进行评分")
+        }
+        else{
+            var patt1=/^[1-9]{1}$|^10$/;
+
+            if(!patt1.test(score)){
+                alert("请输入1-10之间的整数");
+            }
+            else{
+                $.ajax({
+                    url:"{% url 'home:score_save' %}",
+                    type:'post',
+                    async:true,
+                    data:{
+                        'user_id':userid,
+                        'movie_id':movie_id,
+                        'movie_score':score
+                    },
+                    success:function(e){
+                        if(e.data==1){
+                            console.log("更新成功")
+                        }
+                        else{
+                            console.log("添加成功")
+                        }
+
+                    },
+                    error:function(e){
+                        console.log("失败")
+                    }
+                })
+            }
+        }
+
+    })
+</script>
+{% endblock %}

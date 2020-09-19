@@ -1,0 +1,150 @@
+{% load static %}
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>用户相似度</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="{% static 'administrator/js/echarts.min.js' %}"></script>
+</head>
+<body>
+
+<div class="panel-group" id="accordion">
+    {% for info in similar_information %}
+	<div class="panel panel-default" >
+		<div class="btn btn-info" data-toggle="collapse" data-target="#demo{{ forloop.counter }}" style="width:100%;text-align:center;background:#43568cad">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion"
+				   href="#collapseOne">
+                    用户{{ info.userid }}的相似匹配:{{ info.desc }}
+				</a>
+			</h4>
+		</div>
+		<div class="collapse" id="demo{{ forloop.counter }}">
+			<div class="panel-body">
+				<div id="main{{ forloop.counter }}" style="width: 600px;height:400px;float:left;"></div>
+                <div style="width: 650px;height:400px;float:left;margin-left:5px;">
+                        <!--相似度匹配用户-->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item active" style="background:#0d131d4d">
+                                <h4 class="list-group-item-heading">
+                                    相似度较高的用户
+                                </h4>
+                            </a>
+                            <a href="#" class="list-group-item">
+                                <h4 class="list-group-item-heading">
+                                 用户名：  {{ info.people_name.username }}
+                                </h4>
+                                <p class="list-group-item-text">
+                                    {{ info.people_looked_moive }}
+                                </p>
+                            </a>
+
+                        </div>
+                        <!--推荐电影部分-->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item active" style="background:#5d9ace">
+                                <h4 class="list-group-item-heading">
+                                    推荐的高分电影
+                                </h4>
+                            </a>
+                            <a href="#" class="list-group-item" style="display:block;overflow:hidden;height:auto;">
+                                <div style="width:30%;float:left;text-align:center;">
+                                    <img  style="width:115px" src="{{ info.movie_info.movie_image }}" >
+                                </div>
+                                <div style="width:70%;float:left;">
+                                    <table class="table">
+
+                                        <tbody>
+                                            <tr>
+                                                <td style="font-size:14px;font-weight:bold"><span style="font-weight:bolder">电影名称：</span>{{ info.movie_info.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size:14px;font-weight:bold"><span style="font-weight:bolder">电影简介：</span>{{ info.movie_info.movie_desc|truncatechars:113 }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </a>
+
+                        </div>
+
+                </div>
+					<script type="text/javascript">
+						// 基于准备好的dom，初始化echarts实例
+						var myChart = echarts.init(document.getElementById('main{{ forloop.counter }}'));
+
+						// 指定图表的配置项和数据
+						var labelRight = {
+							position: 'right'
+						};
+						option = {
+							title: {
+								text: '用户相似度可视化',
+								subtext: '用户{{ info.userid }}与其他用户的匹配',
+								sublink: 'http://e.weibo.com/1341556070/AjwF2AgQm'
+							},
+							tooltip: {
+								trigger: 'axis',
+								axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+									type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+								}
+							},
+							grid: {
+								top: 80,
+								bottom: 30
+							},
+							xAxis: {
+								type: 'value',
+								position: 'top',
+								splitLine: {
+									lineStyle: {
+										type: 'dashed'
+									}
+								}
+							},
+							yAxis: {
+								type: 'category',
+								axisLine: {show: false},
+								axisLabel: {show: false},
+								axisTick: {show: false},
+								splitLine: {show: false},
+								data: {{ info.echarts_data1|safe }}
+							},
+							series: [
+								{
+									name: '相似度',
+									type: 'bar',
+									stack: '总量',
+									label: {
+										show: true,
+										formatter: '{b}'
+									},
+									data: [
+                                        {% for valuess in info.echarts_data2 %}
+                                            {% if valuess <= 0 %}
+                                                {value:{{ valuess }}, label: labelRight},
+                                            {% else %}
+                                                {{ valuess }},
+                                            {% endif %}
+
+                                        {% endfor %}
+									]
+								}
+							]
+						};
+
+
+						// 使用刚指定的配置项和数据显示图表。
+						myChart.setOption(option);
+					</script>
+			</div>
+
+		</div>
+	</div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
